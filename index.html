@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBR Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+            cursor: pointer;
+        }
+        input {
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Search WBR.csv</h1>
+    <input type="text" id="search" placeholder="Search...">
+    <table id="csv-table">
+        <thead id="csv-head"></thead>
+        <tbody id="csv-body"></tbody>
+    </table>
+
+    <script>
+        // Load CSV file
+        const csvFile = 'WBR.csv';
+
+        // Function to fetch and parse CSV
+        async function loadCSV() {
+            const response = await fetch(csvFile);
+            const csvText = await response.text();
+            const rows = csvText.split('\n').map(row => row.split(','));
+
+            const headers = rows[0];
+            const data = rows.slice(1);
+
+            // Render table
+            const tableHead = document.getElementById('csv-head');
+            const tableBody = document.getElementById('csv-body');
+
+            // Populate table header
+            tableHead.innerHTML = '<tr>' + headers.map(header => `<th>${header}</th>`).join('') + '</tr>';
+
+            // Populate table body
+            tableBody.innerHTML = data.map(row =>
+                '<tr>' + row.map(cell => `<td>${cell}</td>`).join('') + '</tr>'
+            ).join('');
+
+            // Add search functionality
+            const searchInput = document.getElementById('search');
+            searchInput.addEventListener('input', () => filterTable(searchInput.value, headers.length));
+        }
+
+        // Filter table rows based on search query
+        function filterTable(query, columnCount) {
+            const rows = document.querySelectorAll('#csv-body tr');
+            rows.forEach(row => {
+                const cells = Array.from(row.cells).slice(0, columnCount);
+                const matches = cells.some(cell => cell.textContent.toLowerCase().includes(query.toLowerCase()));
+                row.style.display = matches ? '' : 'none';
+            });
+        }
+
+        // Load the CSV on page load
+        loadCSV();
+    </script>
+</body>
+</html>
